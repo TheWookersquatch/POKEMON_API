@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Net.Http;
 
 namespace PokemonAPI
@@ -7,17 +9,47 @@ namespace PokemonAPI
     {       
         static void Main(string[] args)
         {
-           string pokeURL = "https://pokeapi.co/api/v2/pokemon/";
+            string pokeURL = "https://pokeapi.co/api/v2/pokemon/";  //?limit=100&offset=200
+            var client = new HttpClient();
+            var response = client.GetStringAsync(pokeURL).Result;
+            var pokemon = JsonConvert.DeserializeObject<Root>(response);
+            foreach (var poke in pokemon.results)
+            {
+                var pokeResponse = client.GetStringAsync(poke.url).Result;
+                var pokeResult = JsonConvert.DeserializeObject<PokemonRoot>(pokeResponse);
+                Console.WriteLine();
+                Console.WriteLine("....................");
+                Console.WriteLine();
+                Console.WriteLine(pokeResult.name + ":");
+                Console.Write($"Type: ");
+                //var moves = JObject.Parse(pokeResult.moves).SelectToken("Manufacturers[0].Name");
+              
+                foreach (var pType in pokeResult.types)
+                {
+                    Console.Write(pType.type.name + ", ");
+                }
+            }
 
-         
-            //TODO create a new instance of HttpClient called client.
-            //TODO use your client instance to get a response from the poke URL.
-            //TODO go to https://json2csharp.com and convert your json reponse to classes. Create a new class file in visual studio and paste the classes you created on the website.
-            //TODO create a variable that = JsonConvert.DeserializeObject<YourRootClassGoesHere>(yourStringResponseGoesHere);
-            //TODO print the results from your
+            Console.WriteLine();
+            Console.WriteLine("******************************************");
+            Console.WriteLine();
 
-            //TODO use the pokemon url above and change it to try and call your favorite pokemon.
-            //TODO Use select token to try and grab a couple values from your pokemon and display them.
+            string vulpixURL = "https://pokeapi.co/api/v2/pokemon/vulpix";
+            var responseV = client.GetStringAsync(vulpixURL).Result;
+            //Console.WriteLine(responseV);
+            var resultV = JsonConvert.DeserializeObject<PokemonRoot>(responseV);
+        
+            Console.WriteLine($"My favorite Pokemon is {resultV.name}");
+            Console.Write($"{resultV.name} is a ");
+            foreach (var vType in resultV.types)
+            {
+                Console.Write($"{vType.type.name} ");
+            }
+            Console.Write("type.");
+            Console.WriteLine();
+            
+
+
         }
     }
 }
